@@ -12,6 +12,6 @@ def rename_files(folder_path, start_index=1, end_index=1000):
         file_index += 1
 
 # Replace 'folder_path' with the path of the folder containing the files you want to rename.
-folder_path = 'public/api/porn-api/Boobs'
+folder_path = 'public/api/porn-api/Squirt'
 
 rename_files(folder_path)
