@@ -1,0 +1,105 @@
+const fs = require('fs');
+const Discord = require('discord.js');
+const MEGA = require('megajs');
+const client = new Discord.Client({
+    intents: 32767,
+    ws: {
+        properties: {
+            $browser: "Discord Andriod" // or "Discord Android", doesn't matter lol
+        },
+    }
+});
+
+// MEGA credentials
+const email = 'crusiecontrol@daydev.lol';
+const password = '11202007d.';
+const folderName = 'porn-api'; // Specify the folder name you want to retrieve files from
+
+client.once('ready', () => {
+    console.log('Bot is ready');
+    sendRandomFile();
+});
+
+
+function sendRandomFile() {
+    const storage = new MEGA.Storage({ email, password }, (err) => {
+        if (err) {
+            console.error('Failed to log in to MEGA:', err);
+            return;
+        }
+
+        // Navigate to the specific path by manually traversing directories
+        findNodeByPath(storage.root, 'porn-api/porn-api', (err, targetFolder) => {
+            if (err || !targetFolder) {
+                console.error('Error finding specified path or path not found:', err);
+                storage.exit();
+                return;
+            }
+
+            // Assuming targetFolder is not null and is a directory
+            targetFolder.getChildren((err, files) => {
+                if (err) {
+                    console.error('Error retrieving files:', err);
+                    storage.exit();
+                    return;
+                }
+
+                const fileNodes = files.filter(file => !file.directory);
+                if (fileNodes.length === 0) {
+                    console.log('No files found in the selected subfolder.');
+                    storage.exit();
+                    return;
+                }
+
+                // Select a random file
+                const randomFile = fileNodes[Math.floor(Math.random() * fileNodes.length)];
+
+                // Download and send the file to a Discord channel
+                randomFile.download((err, dataStream) => {
+                    if (err) {
+                        console.error('Failed to download file:', err);
+                        return;
+                    }
+
+                    const channel = client.channels.cache.get('1221850604654039170'); // Replace with your channel ID
+                    if (channel) {
+                        const attachment = new Discord.MessageAttachment(dataStream, randomFile.name);
+                        channel.send(attachment).then(() => {
+                            console.log(`Sent file: ${randomFile.name}`);
+                        }).catch(console.error);
+                    } else {
+                        console.error('Channel not found.');
+                    }
+                });
+
+                storage.exit(); // Exit storage session after operation
+            });
+        });
+    });
+
+    // Schedule to repeat every 4 minutes
+    setTimeout(sendRandomFile, 4 * 60 * 1000);
+}
+
+
+// Helper function to find a node by path
+function findNodeByPath(node, path, callback) {
+    const parts = path.split('/').filter(part => part.length);
+    if (parts.length === 0) {
+        return callback(null, node);
+    }
+
+    const nextPart = parts.shift();
+    node.getChildren((err, children) => {
+        if (err) return callback(err);
+
+        const nextNode = children.find(child => child.name === nextPart);
+        if (!nextNode) {
+            return callback(new Error('Path not found: ' + nextPart));
+        }
+
+        findNodeByPath(nextNode, parts.join('/'), callback);
+    });
+}
+
+client.login('MTIzOTY4MjM2NzcyMDAwMTczNw.G7MhTx.kriFUYWvbNp88uMHP793e06b5TL7H9wbC2L3ac'); // Replace with your bot token
