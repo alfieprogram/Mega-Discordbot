@@ -19,7 +19,7 @@ app.get('/', (req, res) => {
 });
 
 // Middleware to serve files from the public directory
-app.use('/boobs', express.static(path.join(__dirname, 'public/api/porn-api/boobs')));
+app.use('/random', express.static(path.join(__dirname, 'public/api/porn-api/random')));
 
 // Endpoint 1: Returns a random greeting
 app.get('/greeting', (req, res) => {
@@ -29,14 +29,14 @@ app.get('/greeting', (req, res) => {
 });
 
 // Endpoint 2: Returns a random number
-app.get('/random-number', (req, res) => {
+app.get('/random-number-to-hundred', (req, res) => {
     const randomNumber = Math.floor(Math.random() * 100) + 1;
     res.json({ number: randomNumber });
 });
 
 // Endpoint 3: Returns a URL to a random file in the public directory
-app.get('/random-file', (req, res) => {
-    fs.readdir('./public/api/porn-api/boobs', (err, files) => {
+app.get('/random-nsfw', (req, res) => {
+    fs.readdir('./public/api/porn-api/random', (err, files) => {
         if (err) {
             return res.status(500).json({ message: 'Unable to access the file directory' });
         }
@@ -44,7 +44,7 @@ app.get('/random-file', (req, res) => {
             return res.status(404).json({ message: 'No files found in the directory' });
         }
         const randomFile = files[Math.floor(Math.random() * files.length)];
-        const fileUrl = `${req.protocol}://${req.get('host')}/boobs/${randomFile}`;
+        const fileUrl = `${req.protocol}://${req.get('host')}/random/${randomFile}`;
         res.json({ url: fileUrl });
     });
 });
